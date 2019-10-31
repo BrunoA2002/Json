@@ -1,3 +1,4 @@
+
 let urlAPI = 'https://gilsonpolito-api.herokuapp.com/alunos/'
 
 $(document).ready(function(){
@@ -29,14 +30,41 @@ function insereLinha(id, nome, site){
                         '<a href=\'#\'class=\'action_delete\' value=\'' + id +
                         '\'><img src=\'imagens/excluir.jpeg\' />'+
                     '</td>' +
-                        '<td class=\'col-xs-4\'>' + nome + 
+                        '<td id=\'nameIdTb\' class=\'col-xs-4\'>' + nome + 
                     '</td>' +
-                    '<td class=\'col-xs-6\' >' + site + 
+                    '<td id =\'siteIdTb\' class=\'col-xs-6\' >' + site + 
                     '</td>'+
                 '</tr>';
     
     $('#alunoTable').append(linha);
 }
+
+$('#update-to-list').on('click', (evento) =>{
+    evento.preventDefault();
+
+    $.ajax({
+        type: 'PUT' ,
+        contentType: 'application/json' ,
+        url: urlAPI ,
+        dataType: 'json' ,
+        data: formToJSON() ,
+        success: function (){
+            $('#alunoTable tr').each(function(){
+                if($(this).find('.action_edit').attr('value') == $('#idHidden').val()){
+                    $(this).find('#nameIdTb').html($('#nomeId').val());
+                    $(this).find('#siteIdTb').html($('#emailId').val());
+
+                    $('#formAluno').get(0).reset();
+                    $('#add-to-list').removeClass('d-none');
+                    $('#update-to-list').addClass('d-none');
+                }
+            }) 
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
+        }    
+    });
+});
 
 $('#add-to-list') .on('click',(evento)=>{
     evento.preventDefault();
@@ -50,6 +78,7 @@ $('#add-to-list') .on('click',(evento)=>{
         success: function(data){
             insereLinha(data.id, data.nome, data.site);
             handler();
+
         },
         error: function(jqXHR, textStatus, errorThrown){
             alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
@@ -93,6 +122,9 @@ function handler(){
                     $('#idHidden').val(data.id);
                     $('#nomeId').val(data.nome);
                     $('#emailId').val(data.site);
+
+                    $('#add-to-list').addClass('d-none');
+                    $('#update-to-list').removeClass('d-none');
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     alert('Status: ' + textStatus + 
