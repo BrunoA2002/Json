@@ -10,7 +10,7 @@ $(document).ready(function(){
         dataType: 'json' ,
         success: function(data){
             $.each(data, function(index, itemData){
-                insereLinha(itemData.id, itemData.nome, itemData.site);
+                insereLinha(itemData.id, itemData.nome, itemData.nota, itemData.site, itemData.endereco, itemData.telefone);
             });
             handler();    
         },
@@ -21,7 +21,7 @@ $(document).ready(function(){
 
 });
 
-function insereLinha(id, nome, site){
+function insereLinha(id, nome, nota, site, endereco, telefone){
     
     let linha = '<tr>'+
                     '<td class=\'col-xs-2\'>' +
@@ -32,7 +32,13 @@ function insereLinha(id, nome, site){
                     '</td>' +
                         '<td id=\'nameIdTb\' class=\'col-xs-4\'>' + nome + 
                     '</td>' +
-                    '<td id =\'siteIdTb\' class=\'col-xs-6\' >' + site + 
+                        '<td id =\'notaaIdTb\' class=\'col-xs-6\' >' + nota + 
+                    '</td>'+                    
+                        '<td id =\'siteeIdTb\' class=\'col-xs-8\' >' + site + 
+                    '</td>'+
+                        '<td id =\'enderecooIdTb\' class=\'col-xs-10\' >' + endereco + 
+                    '</td>'+
+                        '<td id =\'telefoneeIdTb\' class=\'col-xs-12\' >' + telefone + 
                     '</td>'+
                 '</tr>';
     
@@ -41,49 +47,60 @@ function insereLinha(id, nome, site){
 
 $('#update-to-list').on('click', (evento) =>{
     evento.preventDefault();
+    var validator = $("#formAluno").data("bs.validator");
+    validator.validate();
+    if(!validator.isIncomplete()){
 
-    $.ajax({
-        type: 'PUT' ,
-        contentType: 'application/json' ,
-        url: urlAPI ,
-        dataType: 'json' ,
-        data: formToJSON() ,
-        success: function (){
-            $('#alunoTable tr').each(function(){
-                if($(this).find('.action_edit').attr('value') == $('#idHidden').val()){
-                    $(this).find('#nameIdTb').html($('#nomeId').val());
-                    $(this).find('#siteIdTb').html($('#emailId').val());
-
-                    $('#formAluno').get(0).reset();
-                    $('#add-to-list').removeClass('d-none');
-                    $('#update-to-list').addClass('d-none');
-                }
-            }) 
-        },
-        error: function(jqXHR, textStatus, errorThrown){
-            alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
-        }    
-    });
+        $.ajax({
+            type: 'PUT' ,
+            contentType: 'application/json' ,
+            url: urlAPI ,
+            dataType: 'json' ,
+            data: formToJSON() ,
+            success: function (){
+                $('#alunoTable tr').each(function(){
+                    if($(this).find('.action_edit').attr('value') == $('#idHidden').val()){
+                        $(this).find('#nameIdTb').html($('#nomeId').val());
+                        $(this).find('#notaaIdTb').html($('#notaId').val());
+                        $(this).find('#siteeIdTb').html($('#siteId').val());
+                        $(this).find('#enderecooIdTb').html($('#enderecoId').val());
+                        $(this).find('#telefoneeIdTb').html($('#telefoneId').val());
+                        
+                        $('#add-to-list').removeClass('d-none');
+                        $('#update-to-list').addClass('d-none');
+                        $('#formAluno').get(0).reset();                                     
+                    }
+                }) 
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
+            }    
+        });
+    }
 });
 
-$('#add-to-list') .on('click',(evento)=>{
+$('#add-to-list').on('click',(evento)=>{
     evento.preventDefault();
+    var validator = $("#formAluno").data("bs.validator");
+    validator.validate();
+    if(!validator.isIncomplete()){
     
-    $.ajax({
-        type: 'POST',
-        contentType: 'application/json',
-        url: urlAPI,
-        dataType: 'json',
-        data: formToJSON(),
-        success: function(data){
-            insereLinha(data.id, data.nome, data.site);
-            handler();
-
-        },
-        error: function(jqXHR, textStatus, errorThrown){
-            alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
-        }
-    })
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: urlAPI,
+            dataType: 'json',
+            data: formToJSON(),
+            success: function(data){                        
+                insereLinha(data.id, data.nome, data.nota, data.site, data.endereco, data.telefone);           
+                handler();  
+                $('#formAluno').get(0).reset();          
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('Status: ' + textStatus + '\nTipo:' + errorThrown + '\nMensagem: ' + jqXHR.responseText);
+            }
+        })
+    }
 });
 
 function handler(){
@@ -121,7 +138,10 @@ function handler(){
                 success: function(data){
                     $('#idHidden').val(data.id);
                     $('#nomeId').val(data.nome);
-                    $('#emailId').val(data.site);
+                    $('#notaId').val(data.nota);
+                    $('#sitelId').val(data.site);
+                    $('#enderecoId').val(data.endereco);
+                    $('#telefoneId').val(data.telefone);                   
 
                     $('#add-to-list').addClass('d-none');
                     $('#update-to-list').removeClass('d-none');
@@ -141,6 +161,9 @@ function formToJSON(){
     return JSON.stringify({
         "id": $('#idHidden').val(),
         "nome": $('#nomeId').val(),
-        "site": $('#emailId').val(),
+        "nota": $('#notaId').val(),
+        "site": $('#siteId').val(),
+        "endereco": $('#enderecoId').val(),
+        "telefone": $('#telefoneId').val(),
     });
 }
